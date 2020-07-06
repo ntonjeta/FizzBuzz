@@ -8,4 +8,7 @@ let tests =
   testList "Example tests" [
     testCase "Three should be Fizz" <| fun _ ->
       Expect.equal (FizzBuzz.fizzbuzz 3) "Fizz" "Is not Fizz."
+
+    testCase "Five should be Buzz" <| fun _ ->
+      Expect.equal (FizzBuzz.fizzbuzz 5) "Buzz" "Is not Buzz."
   ]
