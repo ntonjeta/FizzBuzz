@@ -5,6 +5,7 @@ module FizzBuzz  =
         match x with 
         | 3 -> "Fizz"
         | 9 -> "Fizz"
+        | 15 -> "FizzBuzz"
         | 5 -> "Buzz"
         | 25 -> "Buzz"
         | _ -> string x

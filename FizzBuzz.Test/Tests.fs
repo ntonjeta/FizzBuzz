@@ -17,4 +17,7 @@ let tests =
 
     testCase "Twentyi-Five should be Buzz" <| fun _ ->
       Expect.equal (FizzBuzz.fizzbuzz 25) "Buzz" "Is not Buzz."
+
+    testCase "Fifteen should be FizzBuzz" <| fun _ ->
+      Expect.equal (FizzBuzz.fizzbuzz 15) "FizzBuzz" "Is not FizzBuzz."
   ]
