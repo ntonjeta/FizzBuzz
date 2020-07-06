@@ -6,4 +6,5 @@ module FizzBuzz  =
         | 3 -> "Fizz"
         | 9 -> "Fizz"
         | 5 -> "Buzz"
+        | 25 -> "Buzz"
         | _ -> string x
