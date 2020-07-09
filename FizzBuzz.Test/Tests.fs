@@ -5,35 +5,63 @@ open FsCheck
 open FizzBuzz
 
 let multipleOfThree n = n * 3
+let multipleOfFive n = n * 5
+let multipleOfBoth n = n * 15
+let noMultiple n = (multipleOfBoth n) - 1
 
 type ThreeGenerator =
     static member ThreeMultiple() =
         Arb.generate<NonNegativeInt>
         |> Gen.map (fun (NonNegativeInt n) -> multipleOfThree n)
+        |> Gen.filter (fun n -> n > 0)
         |> Arb.fromGen
 
 let multipleOfThreeConfig =
     { FsCheckConfig.defaultConfig with
           arbitrary = [ typeof<ThreeGenerator> ] }
 
+type FiveGenerator =
+    static member FiveMultiple() =
+        Arb.generate<NonNegativeInt>
+        |> Gen.map (fun (NonNegativeInt n) -> multipleOfFive n)
+        |> Gen.filter (fun n -> n > 0)
+        |> Arb.fromGen
+
+let multipleOfFiveConfig =
+    { FsCheckConfig.defaultConfig with
+          arbitrary = [ typeof<FiveGenerator> ] }
+
+type BothGenerator =
+    static member BothMultiple() =
+        Arb.generate<NonNegativeInt>
+        |> Gen.map (fun (NonNegativeInt n) -> multipleOfBoth n)
+        |> Arb.fromGen
+
+let multipleOfBothConfig =
+    { FsCheckConfig.defaultConfig with
+          arbitrary = [ typeof<BothGenerator> ] }
+
+type NoMultipleGenerator =
+    static member BothMultiple() =
+        Arb.generate<NonNegativeInt>
+        |> Gen.map (fun (NonNegativeInt n) -> noMultiple n)
+        |> Arb.fromGen
+
+let noMultipleConfig =
+    { FsCheckConfig.defaultConfig with
+          arbitrary = [ typeof<NoMultipleGenerator> ] }
+
 [<Tests>]
 let tests =
     testList "Property based tests"
         [ testPropertyWithConfig multipleOfThreeConfig "Multiple of three should contain Fizz"
-          <| fun x -> Expect.containsAll (FizzBuzz.fizzbuzz x) "Fizz" "Not contain Fizz" ]
+          <| fun x -> Expect.containsAll (FizzBuzz.fizzbuzz x) "Fizz" "Not contain Fizz"
 
-// testList "Example tests"
-//     [ testCase "Three should be Fizz"
-//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 3) "Fizz" "Is not Fizz."
+          testPropertyWithConfig multipleOfFiveConfig "Multiple of five should contain Buzz"
+          <| fun x -> Expect.containsAll (FizzBuzz.fizzbuzz x) "Buzz" "Not contain Buzz"
 
-//       testCase "Five should be Buzz"
-//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 5) "Buzz" "Is not Buzz."
+          testPropertyWithConfig multipleOfBothConfig "Multiple of both should be FizzBuzz"
+          <| fun x -> Expect.equal (FizzBuzz.fizzbuzz x) "FizzBuzz" "Is not FizzBuzz"
 
-//       testCase "Nine should be Fizz"
-//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 9) "Fizz" "Is not Fizz."
-
-//       testCase "Twentyi-Five should be Buzz"
-//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 25) "Buzz" "Is not Buzz."
-
-//       testCase "Fifteen should be FizzBuzz"
-//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 15) "FizzBuzz" "Is not FizzBuzz." ]
+          testPropertyWithConfig noMultipleConfig "Other number should be the same"
+          <| fun x -> Expect.equal (FizzBuzz.fizzbuzz x) (string x) "Is not the same" ]
