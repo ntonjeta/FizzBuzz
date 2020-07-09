@@ -3,7 +3,7 @@
 module FizzBuzz  =
     let fizzbuzz (x:int) = 
         match x with 
-        | 3 -> "Fizz"
+        | n when n%3=0 -> "Fizz"
         | 5 -> "Buzz"
         | 9 -> "Fizz"
         | 15 -> "FizzBuzz"
