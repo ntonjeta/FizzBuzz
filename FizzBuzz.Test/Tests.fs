@@ -1,42 +1,39 @@
 module Tests
 
 open Expecto
+open FsCheck
 open FizzBuzz
 
+let multipleOfThree n = n * 3
 
-let rnd = System.Random()
-let genRandomNumbers count = List.init count (fun _ -> rnd.Next())
-let randomList = genRandomNumbers 100
+type ThreeGenerator =
+    static member ThreeMultiple() =
+        Arb.generate<NonNegativeInt>
+        |> Gen.map (fun (NonNegativeInt n) -> multipleOfThree n)
+        |> Arb.fromGen
 
-let actualList =
-    randomList |> List.map (FizzBuzz.fizzbuzz)
-
-let expectedList =
-    randomList
-    |> List.map (fun i ->
-        match i with
-        | n when i % 3 = 0 && i % 5 = 0 -> "FizzBuzz"
-        | n when i % 3 = 0 -> "Fizz"
-        | n when i % 5 = 0 -> "Buzz"
-        | _ -> string i)
+let multipleOfThreeConfig =
+    { FsCheckConfig.defaultConfig with
+          arbitrary = [ typeof<ThreeGenerator> ] }
 
 [<Tests>]
 let tests =
-    testList "Example tests"
-        [ testCase "Three should be Fizz"
-          <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 3) "Fizz" "Is not Fizz."
+    testList "Property based tests"
+        [ testPropertyWithConfig multipleOfThreeConfig "Multiple of three should contain Fizz"
+          <| fun x -> Expect.containsAll (FizzBuzz.fizzbuzz x) "Fizz" "Not contain Fizz" ]
 
-          testCase "Five should be Buzz"
-          <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 5) "Buzz" "Is not Buzz."
+// testList "Example tests"
+//     [ testCase "Three should be Fizz"
+//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 3) "Fizz" "Is not Fizz."
 
-          testCase "Nine should be Fizz"
-          <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 9) "Fizz" "Is not Fizz."
+//       testCase "Five should be Buzz"
+//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 5) "Buzz" "Is not Buzz."
 
-          testCase "Twentyi-Five should be Buzz"
-          <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 25) "Buzz" "Is not Buzz."
+//       testCase "Nine should be Fizz"
+//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 9) "Fizz" "Is not Fizz."
 
-          testCase "Fifteen should be FizzBuzz"
-          <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 15) "FizzBuzz" "Is not FizzBuzz."
+//       testCase "Twentyi-Five should be Buzz"
+//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 25) "Buzz" "Is not Buzz."
 
-          testCase "Random number test"
-          <| fun _ -> Expect.sequenceEqual actualList expectedList "Not equal" ]
+//       testCase "Fifteen should be FizzBuzz"
+//       <| fun _ -> Expect.equal (FizzBuzz.fizzbuzz 15) "FizzBuzz" "Is not FizzBuzz." ]
